@@ -37,6 +37,7 @@ public abstract class SimpleHttpHandler {
         before(he);
         Response response = buildHttpResponse(he);
         setResponseHeader(he);
+        setResponseHeader(he, response);
         writeResponse(he, response);
         // he.close();
     }
@@ -48,7 +49,7 @@ public abstract class SimpleHttpHandler {
         httpExchange.getResponseBody().close();
     }
 
-    private boolean matchURI(HttpExchange he) {
+    public boolean matchURI(HttpExchange he) {
         return getPath().equalsIgnoreCase(he.getRequestURI().getPath());
     }
 
@@ -58,6 +59,12 @@ public abstract class SimpleHttpHandler {
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
+    }
+
+    private void setResponseHeader(HttpExchange httpExchange, Response response) {
+        for(Map.Entry<String, String> entry: response.getResponseHeaders().entrySet()) {
+            httpExchange.getResponseHeaders().add(entry.getKey(), entry.getValue());
+        }
     }
 
     private void writeResponse(HttpExchange he, Response res) throws IOException {

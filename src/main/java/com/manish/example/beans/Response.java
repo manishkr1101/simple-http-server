@@ -1,8 +1,12 @@
 package com.manish.example.beans;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Response {
     int httpCode;
     String body;
+    Map<String, String> responseHeaders;
 
     public Response() {
         this("");
@@ -15,6 +19,7 @@ public class Response {
     public Response(int httpCode, String body) {
         this.httpCode = httpCode;
         this.body = body;
+        this.responseHeaders = new HashMap<>();
     }
 
     public int getHttpCode() {
@@ -31,5 +36,13 @@ public class Response {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public Map<String, String> getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    public void setResponseHeaders(Map<String, String> responseHeaders) {
+        this.responseHeaders = responseHeaders;
     }
 }
