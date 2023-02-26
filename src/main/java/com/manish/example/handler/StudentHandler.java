@@ -7,6 +7,8 @@ import com.sun.net.httpserver.HttpExchange;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.manish.example.handler.constants.RequestMethod.GET;
+
 public class StudentHandler extends SimpleHttpHandler{
     Map<Long, String> studentsMap = new HashMap<>();
 
@@ -22,6 +24,14 @@ public class StudentHandler extends SimpleHttpHandler{
 
     @Override
     public Response buildHttpResponse(HttpExchange httpExchange) {
+        switch (httpExchange.getRequestMethod()) {
+            case GET:
+                return buildGetHttpResponse(httpExchange);
+        }
+        return new Response(500, "Method not allowed");
+    }
+
+    private Response buildGetHttpResponse(HttpExchange httpExchange) {
         Map<String, String> query = HttpUtil.decodeQueryString(httpExchange.getRequestURI());
         String body;
 
