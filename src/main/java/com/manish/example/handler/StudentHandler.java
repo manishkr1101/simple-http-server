@@ -25,7 +25,7 @@ public class StudentHandler extends SimpleHttpHandler{
         Map<String, String> query = HttpUtil.decodeQueryString(httpExchange.getRequestURI());
         String body;
 
-        if(query.get("id")!=null) {
+        if(query != null && query.get("id")!=null) {
             Long id = Long.valueOf(query.get("id"));
             String student = studentsMap.get(id);
             if(student != null)
@@ -37,19 +37,10 @@ public class StudentHandler extends SimpleHttpHandler{
             }
         }
         else {
-            body = JSONStringify(studentsMap);
+            body = HttpUtil.JSONStringify(studentsMap);
         }
 
         return new Response(body);
-    }
-
-    private <T,S> String JSONStringify(Map<T, S> map) {
-        String body = "{";
-        for(Map.Entry<T, S> entry: map.entrySet()) {
-            body = body + entry.getKey() + ": " + entry.getValue() + ",";
-        }
-        body += "}";
-        return body;
     }
 
     @Override
