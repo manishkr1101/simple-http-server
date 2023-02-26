@@ -51,6 +51,10 @@ public class StudentHandler extends SimpleHttpHandler{
 
     @Override
     public boolean matchURI(HttpExchange he) {
-        return true;
+        String pathWithQuery = he.getRequestURI().toString();
+        boolean exactMatch = getPath().equals(pathWithQuery);
+        boolean matchWithQuery = pathWithQuery.startsWith(getPath()) && pathWithQuery.length() > getPath().length() && pathWithQuery.charAt(getPath().length()) == '?';
+
+        return exactMatch || matchWithQuery;
     }
 }
