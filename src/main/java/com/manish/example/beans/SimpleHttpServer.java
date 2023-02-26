@@ -35,7 +35,7 @@ public class SimpleHttpServer implements Server {
         server.createContext(path, handler);
     }
 
-    public void register(SimpleHttpHandler handler) {
+    public <T extends SimpleHttpHandler> void register(T handler) {
         System.out.println("registering path: " + handler.getPath());
         server.createContext(handler.getPath(), new HttpHandler() {
 

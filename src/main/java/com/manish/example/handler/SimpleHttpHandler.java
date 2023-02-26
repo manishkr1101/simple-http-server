@@ -14,6 +14,10 @@ public abstract class SimpleHttpHandler {
     public abstract String getPath();
     public abstract String buildResponse(HttpExchange he);
 
+    public void setResponseHeader(HttpExchange httpExchange) {
+        setBasicResponseHeader(httpExchange);
+    }
+
     // can be modified
     public void before(HttpExchange he) throws IOException {
         System.out.println("request coming to " + getPath());
@@ -24,8 +28,17 @@ public abstract class SimpleHttpHandler {
     public void handle(HttpExchange he) throws IOException {
         before(he);
         String response = buildResponse(he);
+        setResponseHeader(he);
         writeResponse(he, response);
-        he.close();
+        // he.close();
+    }
+
+    private void setBasicResponseHeader(HttpExchange httpExchange) {
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
     }
 
     private void writeResponse(HttpExchange he, String response) throws IOException {
