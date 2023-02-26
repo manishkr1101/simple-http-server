@@ -2,17 +2,20 @@ package com.manish.example.handler;
 
 import java.io.IOException;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
+import com.manish.example.beans.Response;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 public abstract class SimpleHttpHandler {
 
     public abstract String getPath();
-    public abstract String buildResponse(HttpExchange he);
+    @Deprecated
+    public String buildResponse(HttpExchange he) { return ""; };
+    public Response buildHttpResponse(HttpExchange httpExchange) {
+        return new Response(buildResponse(httpExchange));
+    }
 
     public void setResponseHeader(HttpExchange httpExchange) {
         setBasicResponseHeader(httpExchange);
@@ -20,18 +23,19 @@ public abstract class SimpleHttpHandler {
 
     // can be modified
     public void before(HttpExchange he) throws IOException {
-        System.out.println("request coming to " + getPath());
+
         describe(he);
     }
 
     // template function
     public void handle(HttpExchange he) throws IOException {
+        System.out.println("Request handled by " + getPath());
         if(!matchURI(he)) {
             handleNotFoundError(he);
             return;
         }
         before(he);
-        String response = buildResponse(he);
+        Response response = buildHttpResponse(he);
         setResponseHeader(he);
         writeResponse(he, response);
         // he.close();
@@ -56,10 +60,11 @@ public abstract class SimpleHttpHandler {
         httpExchange.getResponseHeaders().add("Access-Control-Allow-Credentials-Header", "*");
     }
 
-    private void writeResponse(HttpExchange he, String response) throws IOException {
-        he.sendResponseHeaders(200, response.length());
+    private void writeResponse(HttpExchange he, Response res) throws IOException {
+        String body = res.getBody();
+        he.sendResponseHeaders(res.getHttpCode(), body.length());
         OutputStream os = he.getResponseBody();
-        os.write(response.getBytes());
+        os.write(body.getBytes());
         os.close();
     }
 

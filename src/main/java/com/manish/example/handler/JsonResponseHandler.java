@@ -1,5 +1,6 @@
 package com.manish.example.handler;
 
+import com.manish.example.beans.Response;
 import com.sun.net.httpserver.HttpExchange;
 
 public class JsonResponseHandler extends SimpleHttpHandler {
@@ -10,8 +11,9 @@ public class JsonResponseHandler extends SimpleHttpHandler {
     }
 
     @Override
-    public String buildResponse(HttpExchange he) {
-        return "{\"name\": \"manish\", \"age\": 22}";
+    public Response buildHttpResponse(HttpExchange httpExchange) {
+        String body = "{\"name\": \"manish\", \"age\": 22}";
+        return new Response(200, body);
     }
 
     @Override
