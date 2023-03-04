@@ -1,26 +1,28 @@
 package com.manish.example.handler;
 
+import com.manish.example.beans.ErrorResponse;
 import com.manish.example.beans.JsonResponse;
 import com.manish.example.beans.Response;
 import com.manish.example.handler.util.HttpUtil;
+import com.manish.example.pojo.Student;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.manish.example.handler.constants.RequestMethod.GET;
 import static com.manish.example.handler.constants.RequestMethod.POST;
 
 public class StudentHandler extends SimpleHttpHandler{
-    Map<Long, String> studentsMap = new HashMap<>();
+    List<Student> students;
 
     public StudentHandler() {
-        studentsMap.put(101L, "Harsh");
-        studentsMap.put(102L, "Kundan");
-        studentsMap.put(103L, "Manish");
+        students = new ArrayList<>();
+        students.add(new Student("Harsh"));
+        students.add(new Student("Kundan"));
+        students.add(new Student("Manish"));
     }
     @Override
     public String getPath() {
@@ -35,7 +37,7 @@ public class StudentHandler extends SimpleHttpHandler{
             case POST:
                 return buildPostHttpResponse(httpExchange);
         }
-        return new Response(500, "Method not allowed");
+        return ErrorResponse.message(500, "Method not allowed");
     }
 
     private Response buildPostHttpResponse(HttpExchange httpExchange) {
@@ -53,30 +55,18 @@ public class StudentHandler extends SimpleHttpHandler{
 
     private Response buildGetHttpResponse(HttpExchange httpExchange) {
         Map<String, String> query = HttpUtil.decodeQueryString(httpExchange.getRequestURI());
-        String body;
+        Response response;
 
         if(query != null && query.get("id")!=null) {
             Long id = Long.valueOf(query.get("id"));
-            String student = studentsMap.get(id);
-            if(student != null)
-                body = String.format("{%d:%s}", id, student);
-            else {
-                Response response = new Response(404, "Student with id: " + id + " not found!");
-                response.getResponseHeaders().put("Content-Type", "text/html");
-                return response;
-            }
+            Optional<Student> student = students.stream().filter(x -> x.getId() == id).findFirst();
+            response = student.isPresent() ? new JsonResponse(student.get()) : ErrorResponse.message("student not found");
         }
         else {
-            body = HttpUtil.toJson(studentsMap);
+            response = new JsonResponse(students);
         }
 
-        return new Response(body);
-    }
-
-    @Override
-    public void setResponseHeader(HttpExchange httpExchange) {
-        super.setResponseHeader(httpExchange);
-        httpExchange.getResponseHeaders().add("Content-Type", "application/json");
+        return response;
     }
 
     @Override
