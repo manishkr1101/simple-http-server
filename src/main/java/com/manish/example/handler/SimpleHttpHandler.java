@@ -3,13 +3,16 @@ package com.manish.example.handler;
 import java.io.IOException;
 
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.util.*;
 
 import com.manish.example.beans.Response;
 import com.sun.net.httpserver.HttpExchange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class SimpleHttpHandler {
-
+    Logger logger = LoggerFactory.getLogger(SimpleHttpHandler.class);
     public abstract String getPath();
     @Deprecated
     public String buildResponse(HttpExchange he) { return ""; };
@@ -22,16 +25,14 @@ public abstract class SimpleHttpHandler {
     }
 
     // can be modified
-    public void before(HttpExchange he) throws IOException {
-
-        describe(he);
-    }
+    public void before(HttpExchange he) throws IOException {  }
 
     // template function
     public void handle(HttpExchange he) throws IOException {
-        System.out.println("Request handled by " + getPath());
+//        System.out.println("Request handled by " + getPath());
+        describe(he);
         if(!matchURI(he)) {
-            handleNotFoundError(he);
+            handlePageNotFoundError(he);
             return;
         }
         before(he);
@@ -42,7 +43,7 @@ public abstract class SimpleHttpHandler {
         // he.close();
     }
 
-    private void handleNotFoundError(HttpExchange httpExchange) throws IOException {
+    private void handlePageNotFoundError(HttpExchange httpExchange) throws IOException {
         String response = "Could not found this page :(";
         httpExchange.sendResponseHeaders(404, response.length());
         httpExchange.getResponseBody().write(response.getBytes());
@@ -76,14 +77,20 @@ public abstract class SimpleHttpHandler {
     }
 
     // util functions
-    private void describe(HttpExchange he) throws IOException {
-        System.out.println("Request method " + he.getRequestMethod());
-        Set<Map.Entry<String, List<String>>> entries = he.getRequestHeaders().entrySet();
-        String response = "";
-        for (Map.Entry<String, List<String>> entry : entries)
-            response += entry.toString() + "\n";
-        System.out.print("Request headers: \n" + response);
-        System.out.println("Request URI " + he.getRequestURI().getPath());
-        System.out.println("Request body " + he.getRequestBody().readAllBytes().toString());
+    private void describe(HttpExchange he) {
+//        Set<Map.Entry<String, List<String>>> entries = he.getRequestHeaders().entrySet();
+//        String response = "";
+//        for (Map.Entry<String, List<String>> entry : entries)
+//            response += entry.toString() + "\n";
+//        System.out.print("Request headers: \n" + response);
+        String line = String.format(
+                "[%s] - %s %s   [Host: %s, User-agent: %s]",
+                new Timestamp(System.currentTimeMillis()),
+                he.getRequestMethod(),
+                he.getRequestURI().toString(),
+                he.getRequestHeaders().getFirst("Host"),
+                he.getRequestHeaders().getFirst("User-agent")
+        );
+        System.out.println(line);
     }
 }
